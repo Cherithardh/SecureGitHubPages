@@ -1,46 +1,57 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const cors = require('cors');
+// backend/server.js
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const fs = require("fs");
+const bcrypt = require("bcrypt");
 
 const app = express();
 const PORT = 3000;
 
-app.use(bodyParser.json());
 app.use(cors());
+app.use(bodyParser.json());
 
-// Load users from JSON file
-const usersFile = './users.json';
-let users = [];
-if (fs.existsSync(usersFile)) {
-    users = JSON.parse(fs.readFileSync(usersFile));
+// Load or create user database
+const usersFile = "./users.json";
+if (!fs.existsSync(usersFile)) {
+  fs.writeFileSync(usersFile, JSON.stringify([]));
 }
 
-// Register endpoint
-app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-    if (users.find(u => u.username === username)) {
-        return res.status(400).send({ message: 'User already exists' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, password: hashedPassword });
-    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
-    res.send({ message: 'User registered successfully' });
+// Register new user
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password)
+    return res.status(400).json({ message: "All fields required" });
+
+  const users = JSON.parse(fs.readFileSync(usersFile));
+
+  if (users.find((u) => u.username === username)) {
+    return res.status(400).json({ message: "User already exists" });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  users.push({ username, password: hashedPassword });
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+
+  res.json({ message: "User registered successfully!" });
 });
 
-// Login endpoint
-app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-    const user = users.find(u => u.username === username);
-    if (!user) return res.status(400).send({ message: 'Invalid credentials' });
+// Login user
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).send({ message: 'Invalid credentials' });
+  const users = JSON.parse(fs.readFileSync(usersFile));
+  const user = users.find((u) => u.username === username);
 
-    res.send({ message: 'Login successful' });
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return res.status(400).json({ message: "Invalid password" });
+
+  res.json({ message: "Login successful!" });
 });
 
 app.listen(PORT, () => {
-    console.log(`Backend running at http://localhost:${PORT}`);
+  console.log(`✅ Backend running on http://localhost:${PORT}`);
 });

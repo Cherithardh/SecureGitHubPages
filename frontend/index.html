@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Secure GitHub Pages</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Secure Login</title>
 </head>
 <body>
-    <h1>Welcome to Secure GitHub Pages</h1>
-    <a href="login.html">Login/Register</a>
+  <h2>Register</h2>
+  <input id="regUser" placeholder="Username">
+  <input id="regPass" type="password" placeholder="Password">
+  <button onclick="registerUser()">Register</button>
+
+  <h2>Login</h2>
+  <input id="logUser" placeholder="Username">
+  <input id="logPass" type="password" placeholder="Password">
+  <button onclick="loginUser()">Login</button>
+
+  <script src="script.js"></script>
 </body>
 </html>
