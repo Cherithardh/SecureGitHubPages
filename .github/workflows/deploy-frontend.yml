@@ -6,11 +6,12 @@ on:
       - main
 
 permissions:
-  contents: write   # <-- ADD THIS LINE HERE
+  contents: write    # ✅ Allows deployment to gh-pages branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
